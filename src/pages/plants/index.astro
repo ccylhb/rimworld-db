@@ -1,0 +1,47 @@
+---
+import Base from "../../layouts/Base.astro";
+import DataTable from "../../components/DataTable.astro";
+import Related from "../../components/Related.astro";
+import plants from "../../data/rimworld_plants.json";
+
+const n = (v: any) => {
+  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
+  return m ? parseFloat(m[0]) : "";
+};
+const rows = plants
+  .map((x) => ({
+    name: `<a href="/plants/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+    _sort: x.title.toLowerCase(),
+    grow: n(x.fields?.["grow days"]),
+    nutrition: n(x.fields?.nutrition),
+    product: (x.fields?.product || "").slice(0, 28),
+    fertility: n(x.fields?.["min fertility"]),
+  }))
+  .sort((a: any, b: any) => a._sort.localeCompare(b._sort));
+---
+<Base
+  title={`RimWorld Plants — ${plants.length} plants with grow days & yields`}
+  description={`RimWorld plant database: grow days, nutrition, harvested product and fertility needs for ${plants.length} plants and crops.`}
+>
+  <h1>Plants</h1>
+  <p class="muted">{plants.length} plants · grow days, nutrition and harvested products. Click a column to sort.</p>
+  <DataTable
+    id="plants"
+    rows={rows as any}
+    searchPlaceholder="Search plants..."
+    columns={[
+      { key: "name", label: "Plant" },
+      { key: "grow", label: "Grow days", type: "number" },
+      { key: "nutrition", label: "Nutrition", type: "number" },
+      { key: "product", label: "Product" },
+      { key: "fertility", label: "Min fertility", type: "number" },
+    ]}
+  />
+  <Related
+    links={[
+      { href: "/food/", title: "Food", sub: "Nutrition values" },
+      { href: "/animals/", title: "Animals", sub: "Stats & diet" },
+      { href: "/rankings/", title: "Rankings", sub: "Best picks" },
+    ]}
+  />
+</Base>

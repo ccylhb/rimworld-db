@@ -1,0 +1,54 @@
+---
+import Base from "../../layouts/Base.astro";
+import Related from "../../components/Related.astro";
+import EntryStats from "../../components/EntryStats.astro";
+import weapons from "../../data/rimworld_weapons.json";
+
+export function getStaticPaths() {
+  return weapons.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
+}
+
+const { x } = Astro.props as any;
+const f = x.fields || {};
+const n = (v: any) => {
+  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
+  return m ? m[0] : "";
+};
+const similar = weapons
+  .filter((o: any) => o.slug !== x.slug && (o.fields?.["tech level"] || "") === (f["tech level"] || ""))
+  .slice(0, 6);
+---
+<Base
+  title={`${x.title} — RimWorld weapon stats (damage ${n(f.damage) || "?"}, range ${n(f.range) || "?"})`}
+  description={`${x.title}: ${n(f.damage) || "?"} ${f["damage type"] || ""} damage, ${n(f.range) || "?"} cell range, warmup ${n(f.warmup) || "?"} ticks, cooldown ${n(f.cooldown) || "?"} ticks — RimWorld weapon values.`}
+>
+  <h1 class="icon-h1">
+    {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
+    <span>{x.title}</span>
+  </h1>
+  {f.description && <p class="muted">{f.description}</p>}
+  <EntryStats entry={x} keys={["damage", "range", "warmup", "cooldown", "marketvalue", "mass base"]} labels={{ damage: "Damage", range: "Range (cells)", warmup: "Warmup (ticks)", cooldown: "Cooldown (ticks)", marketvalue: "Value (¤)", "mass base": "Mass (kg)" }} />
+  <p>
+    {f["tech level"] && <span class="tag" style="margin:0.1rem">{f["tech level"]}</span>}
+    {f["damage type"] && <span class="tag" style="margin:0.1rem">{f["damage type"]}</span>}
+    {f.mode && <span class="tag" style="margin:0.1rem">{f.mode}</span>}
+    {f.research && <span class="tag" style="margin:0.1rem">Research: {f.research}</span>}
+  </p>
+  {f.armorpenetration && <p><strong>Armor penetration:</strong> {f.armorpenetration}%</p>}
+  {(f.accuracytouch || f.accuracyshort || f.accuracymedium || f.accuracylong) && (
+    <p><strong>Accuracy:</strong> touch {f.accuracytouch || "-"}% · short {f.accuracyshort || "-"}% · medium {f.accuracymedium || "-"}% · long {f.accuracylong || "-"}%</p>
+  )}
+  {x.intro && <p>{x.intro}</p>}
+  <Related
+    links={[
+      ...similar.map((s: any) => ({
+        href: `/weapons/${s.slug}/`,
+        title: s.title,
+        sub: `Damage ${s.fields?.damage || "?"} · Range ${s.fields?.range || "?"}`,
+        icon: s.icon_file ? `/icons/${s.icon_file}` : undefined,
+      })),
+      { href: "/weapons/", title: "All Weapons", sub: "Sortable DPS table" },
+      { href: "/dps-calculator/", title: "DPS Calculator", sub: "Compare weapons", tool: true },
+    ]}
+  />
+</Base>

@@ -1,0 +1,61 @@
+---
+import Base from "../../layouts/Base.astro";
+import DataTable from "../../components/DataTable.astro";
+import Related from "../../components/Related.astro";
+import weapons from "../../data/rimworld_weapons.json";
+
+const n = (v: any) => {
+  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
+  return m ? parseFloat(m[0]) : "";
+};
+const dps = (x: any) => {
+  const dmg = n(x.fields?.damage);
+  if (!dmg || x.fields?.range === undefined || x.fields?.range === "") return "";
+  const shots = Math.max(parseInt(x.fields?.burst || "1") || 1, 1);
+  const interval = shots > 1 ? (parseFloat(x.fields?.burpticks || "10") || 10) : 0;
+  const warmup = n(x.fields?.warmup) || 0;
+  const cooldown = n(x.fields?.cooldown) || 0;
+  if (!warmup && !cooldown) return "";
+  return Math.round(((dmg * shots) / ((warmup + cooldown + shots * interval) / 60)) * 100) / 100;
+};
+const rows = weapons
+  .map((x) => ({
+    name: `<a href="/weapons/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+    _sort: x.title.toLowerCase(),
+    dps: dps(x),
+    damage: n(x.fields?.damage),
+    range: n(x.fields?.range),
+    warmup: n(x.fields?.warmup),
+    cooldown: n(x.fields?.cooldown),
+    marketvalue: n(x.fields?.marketvalue),
+  }))
+  .sort((a: any, b: any) => a._sort.localeCompare(b._sort));
+---
+<Base
+  title={`RimWorld Weapons — ${weapons.length} weapons with damage, range & DPS`}
+  description={`RimWorld weapon database: damage, range, warmup, cooldown, burst and computed DPS for ${weapons.length} ranged and melee weapons.`}
+>
+  <h1>Weapons</h1>
+  <p class="muted">{weapons.length} weapons · damage, range (cells), warmup/cooldown (ticks) and computed DPS. Click a column to sort.</p>
+  <DataTable
+    id="weapons"
+    rows={rows as any}
+    searchPlaceholder="Search weapons..."
+    columns={[
+      { key: "name", label: "Weapon" },
+      { key: "dps", label: "DPS", type: "number" },
+      { key: "damage", label: "Damage", type: "number" },
+      { key: "range", label: "Range", type: "number" },
+      { key: "warmup", label: "Warmup", type: "number" },
+      { key: "cooldown", label: "Cooldown", type: "number" },
+      { key: "marketvalue", label: "Value (¤)", type: "number" },
+    ]}
+  />
+  <Related
+    links={[
+      { href: "/dps-calculator/", title: "DPS Calculator", sub: "Compare weapons", tool: true },
+      { href: "/rankings/", title: "Rankings", sub: "Best weapons & armor" },
+      { href: "/apparel/", title: "Apparel", sub: "Armor ratings" },
+    ]}
+  />
+</Base>

@@ -1,0 +1,50 @@
+---
+import Base from "../../layouts/Base.astro";
+import Related from "../../components/Related.astro";
+import EntryStats from "../../components/EntryStats.astro";
+import animals from "../../data/rimworld_animals.json";
+
+export function getStaticPaths() {
+  return animals.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
+}
+
+const { x } = Astro.props as any;
+const f = x.fields || {};
+const atk = [1, 2, 3, 4, 5, 6].map((i) => ({ dmg: f[`attack${i}dmg`], type: f[`attack${i}type`], part: f[`attack${i}part`], cool: f[`attack${i}cool`] })).filter((a) => a.dmg);
+const similar = animals
+  .filter((o: any) => o.slug !== x.slug && (o.fields?.diet || "") === (f.diet || ""))
+  .slice(0, 6);
+---
+<Base
+  title={`${x.title} — RimWorld animal stats (speed ${f.movespeed || "?"}, combat power ${f.combatpower || "?"})`}
+  description={`${x.title}: ${f.movespeed || "?"} cells/s speed, ${f.combatpower || "?"} combat power${f.armorsharp ? `, ${f.armorsharp}% sharp armor` : ""} — RimWorld animal stats.`}
+>
+  <h1 class="icon-h1">
+    {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
+    <span>{x.title}</span>
+  </h1>
+  {f.description && <p class="muted">{f.description}</p>}
+  <EntryStats entry={x} keys={["movespeed", "combatpower", "armorsharp", "armorblunt", "wildness", "marketvalue", "bodysize"]} labels={{ movespeed: "Speed (c/s)", combatpower: "Combat power", armorsharp: "Sharp armor", armorblunt: "Blunt armor", wildness: "Wildness", marketvalue: "Value (¤)", bodysize: "Body size" }} />
+  <p>
+    {f.diet && <span class="tag" style="margin:0.1rem">Diet: {f.diet}</span>}
+    {f.trainable && <span class="tag" style="margin:0.1rem">Trainable</span>}
+    {f.matehunter && <span class="tag" style="margin:0.1rem">Manhunter</span>}
+  </p>
+  <p><strong>Comfortable temperature:</strong> {f["min comfortable temperature"] || "?"} to {f["max comfortable temperature"] || "?"} °C</p>
+  {atk.length > 0 && (
+    <p><strong>Attacks:</strong> {atk.map((a) => `${a.part || "body"} ${a.dmg} (${a.type})`).join(" · ")}</p>
+  )}
+  {x.intro && <p>{x.intro}</p>}
+  <Related
+    links={[
+      ...similar.map((s: any) => ({
+        href: `/animals/${s.slug}/`,
+        title: s.title,
+        sub: `Speed ${s.fields?.movespeed || "?"} · CP ${s.fields?.combatpower || "?"}`,
+        icon: s.icon_file ? `/icons/${s.icon_file}` : undefined,
+      })),
+      { href: "/animals/", title: "All Animals", sub: "Sortable stats table" },
+      { href: "/rankings/", title: "Rankings", sub: "Strongest animals" },
+    ]}
+  />
+</Base>

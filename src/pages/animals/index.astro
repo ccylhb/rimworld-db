@@ -1,0 +1,51 @@
+---
+import Base from "../../layouts/Base.astro";
+import DataTable from "../../components/DataTable.astro";
+import Related from "../../components/Related.astro";
+import animals from "../../data/rimworld_animals.json";
+
+const n = (v: any) => {
+  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
+  return m ? parseFloat(m[0]) : "";
+};
+const rows = animals
+  .map((x) => ({
+    name: `<a href="/animals/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+    _sort: x.title.toLowerCase(),
+    speed: n(x.fields?.movespeed),
+    sharp: n(x.fields?.armorsharp),
+    cp: n(x.fields?.combatpower),
+    value: n(x.fields?.marketvalue),
+    wild: n(x.fields?.wildness),
+    diet: (x.fields?.diet || "").slice(0, 24),
+  }))
+  .sort((a: any, b: any) => a._sort.localeCompare(b._sort));
+---
+<Base
+  title={`RimWorld Animals — ${animals.length} animals with speed, armor & combat power`}
+  description={`RimWorld animal database: move speed, armor ratings, combat power, wildness, market value and diet for ${animals.length} animals.`}
+>
+  <h1>Animals</h1>
+  <p class="muted">{animals.length} animals · speed, armor (%), combat power and wildness. Click a column to sort.</p>
+  <DataTable
+    id="animals"
+    rows={rows as any}
+    searchPlaceholder="Search animals..."
+    columns={[
+      { key: "name", label: "Animal" },
+      { key: "speed", label: "Speed (c/s)", type: "number" },
+      { key: "sharp", label: "Sharp armor", type: "number" },
+      { key: "cp", label: "Combat power", type: "number" },
+      { key: "wild", label: "Wildness", type: "number" },
+      { key: "value", label: "Value (¤)", type: "number" },
+      { key: "diet", label: "Diet" },
+    ]}
+  />
+  <Related
+    links={[
+      { href: "/plants/", title: "Plants", sub: "Grow times & yields" },
+      { href: "/food/", title: "Food", sub: "Nutrition values" },
+      { href: "/rankings/", title: "Rankings", sub: "Best picks" },
+    ]}
+  />
+</Base>

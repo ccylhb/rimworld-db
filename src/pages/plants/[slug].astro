@@ -1,0 +1,45 @@
+---
+import Base from "../../layouts/Base.astro";
+import Related from "../../components/Related.astro";
+import EntryStats from "../../components/EntryStats.astro";
+import plants from "../../data/rimworld_plants.json";
+
+export function getStaticPaths() {
+  return plants.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
+}
+
+const { x } = Astro.props as any;
+const f = x.fields || {};
+const similar = plants
+  .filter((o: any) => o.slug !== x.slug && (o.fields?.product || "") === (f.product || "") && f.product)
+  .slice(0, 6);
+---
+<Base
+  title={`${x.title} — RimWorld plant stats (${f["grow days"] || "?"} grow days)`}
+  description={`${x.title}: ${f["grow days"] || "?"} grow days${f.product ? `, harvest ${f.product}` : ""}${f.nutrition ? `, ${f.nutrition} nutrition` : ""} — RimWorld plant values.`}
+>
+  <h1 class="icon-h1">
+    {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
+    <span>{x.title}</span>
+  </h1>
+  {f.description && <p class="muted">{f.description}</p>}
+  <EntryStats entry={x} keys={["grow days", "nutrition", "min fertility", "hp", "beauty"]} labels={{ "grow days": "Grow days", nutrition: "Nutrition", "min fertility": "Min fertility", hp: "HP", beauty: "Beauty" }} />
+  <p>
+    {f.product && <span class="tag" style="margin:0.1rem">Product: {f.product}</span>}
+    {f["food type"] && <span class="tag" style="margin:0.1rem">{f["food type"]}</span>}
+    {f["cave plant"] && <span class="tag" style="margin:0.1rem">Cave plant</span>}
+  </p>
+  {x.intro && <p>{x.intro}</p>}
+  <Related
+    links={[
+      ...similar.map((s: any) => ({
+        href: `/plants/${s.slug}/`,
+        title: s.title,
+        sub: `Grow ${s.fields?.["grow days"] || "?"} days`,
+        icon: s.icon_file ? `/icons/${s.icon_file}` : undefined,
+      })),
+      { href: "/plants/", title: "All Plants", sub: "Sortable grow table" },
+      { href: "/food/", title: "Food", sub: "Nutrition values" },
+    ]}
+  />
+</Base>

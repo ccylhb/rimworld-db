@@ -1,0 +1,53 @@
+---
+import Base from "../../layouts/Base.astro";
+import DataTable from "../../components/DataTable.astro";
+import Related from "../../components/Related.astro";
+import apparel from "../../data/rimworld_apparel.json";
+
+const n = (v: any) => {
+  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
+  return m ? parseFloat(m[0]) : "";
+};
+const rows = apparel
+  .map((x) => ({
+    name: `<a href="/apparel/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+    _sort: x.title.toLowerCase(),
+    sharp: n(x.fields?.armorsharp),
+    blunt: n(x.fields?.armorblunt),
+    heat: n(x.fields?.armorheat),
+    cold: n(x.fields?.insulationcold),
+    hp: n(x.fields?.hp),
+    mass: n(x.fields?.["mass base"]),
+    value: n(x.fields?.marketvalue),
+  }))
+  .sort((a: any, b: any) => a._sort.localeCompare(b._sort));
+---
+<Base
+  title={`RimWorld Apparel & Armor — ${apparel.length} pieces with armor ratings`}
+  description={`RimWorld apparel database: sharp, blunt and heat armor ratings, insulation, HP and mass for ${apparel.length} clothing and armor pieces.`}
+>
+  <h1>Apparel & Armor</h1>
+  <p class="muted">{apparel.length} pieces · armor ratings (%), insulation (°C) and HP. Click a column to sort.</p>
+  <DataTable
+    id="apparel"
+    rows={rows as any}
+    searchPlaceholder="Search apparel..."
+    columns={[
+      { key: "name", label: "Piece" },
+      { key: "sharp", label: "Sharp armor", type: "number" },
+      { key: "blunt", label: "Blunt armor", type: "number" },
+      { key: "heat", label: "Heat armor", type: "number" },
+      { key: "cold", label: "Cold insulation", type: "number" },
+      { key: "hp", label: "HP", type: "number" },
+      { key: "mass", label: "Mass (kg)", type: "number" },
+      { key: "value", label: "Value (¤)", type: "number" },
+    ]}
+  />
+  <Related
+    links={[
+      { href: "/rankings/", title: "Rankings", sub: "Best armor per kg" },
+      { href: "/weapons/", title: "Weapons", sub: "Damage & DPS" },
+      { href: "/food/", title: "Food", sub: "Nutrition values" },
+    ]}
+  />
+</Base>

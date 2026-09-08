@@ -1,0 +1,121 @@
+---
+import Base from "../layouts/Base.astro";
+import Related from "../components/Related.astro";
+import weapons from "../data/rimworld_weapons.json";
+
+const n = (v: any) => {
+  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
+  return m ? parseFloat(m[0]) : 0;
+};
+const items = weapons
+  .map((x) => {
+    const dmg = n(x.fields?.damage);
+    const range = n(x.fields?.range);
+    const shots = Math.max(parseInt(x.fields?.burst || "1") || 1, 1);
+    const interval = shots > 1 ? (n(x.fields?.burpticks) || 10) : 0;
+    const warmup = n(x.fields?.warmup);
+    const cooldown = n(x.fields?.cooldown);
+    let dps = 0;
+    if (dmg > 0 && range > 0 && (warmup > 0 || cooldown > 0)) {
+      dps = Math.round(((dmg * shots) / ((warmup + cooldown + shots * interval) / 60)) * 100) / 100;
+    }
+    return {
+      slug: x.slug,
+      name: x.title,
+      damage: dmg,
+      shots,
+      warmup,
+      cooldown,
+      interval,
+      range,
+      dps,
+      icon: x.icon_file || "",
+    };
+  })
+  .filter((x) => x.dps > 0)
+  .sort((a, b) => b.dps - a.dps);
+---
+<Base
+  title="RimWorld DPS Calculator — compare weapon damage per second"
+  description="RimWorld weapon DPS calculator: computed damage per second from warmup, cooldown and burst data. Compare ranged weapons and time-to-kill targets."
+>
+  <h1>Weapon DPS Calculator</h1>
+  <p class="muted">DPS is computed from wiki infobox data: <em>damage × shots ÷ cycle seconds</em>, where cycle = (warmup + cooldown + burst interval) ticks ÷ 60. Melee weapons are excluded (no range data).</p>
+
+  <div class="grid grid-2" style="margin:1rem 0">
+    <div class="card">
+      <strong>Pick weapons to compare</strong>
+      <input id="q" type="search" placeholder="Filter weapons..." style="width:100%;max-width:320px;margin:0.5rem 0" />
+      <select id="pick" size="12" style="width:100%">
+        {items.map((x) => <option value={x.slug}>{x.name} — {x.dps} DPS</option>)}
+      </select>
+      <button id="add" style="margin-top:0.5rem">Add →</button>
+    </div>
+    <div class="card">
+      <strong>Your comparison</strong>
+      <ul id="plan" style="min-height:180px"></ul>
+      <label style="display:block;margin:0.75rem 0 0.25rem">Target HP for time-to-kill: <input id="hp" type="number" value="100" min="1" style="width:90px" /></label>
+      <div id="ttk" class="muted"></div>
+      <button id="clear" style="margin-top:0.5rem;background:var(--bg-soft);color:var(--text);border:1px solid var(--border)">Clear</button>
+    </div>
+  </div>
+
+  <h2>Top DPS — all ranged weapons</h2>
+  <div class="card">
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr><th style="text-align:left">#</th><th style="text-align:left">Weapon</th><th style="text-align:right">DPS</th><th style="text-align:right">Damage</th><th style="text-align:right">Shots</th><th style="text-align:right">Range</th></tr></thead>
+      <tbody id="topTable"></tbody>
+    </table>
+  </div>
+
+  <script define:vars={{ items }}>
+    const plan = [];
+    const bySlug = Object.fromEntries(items.map((x) => [x.slug, x]));
+    const q = document.getElementById("q");
+    const pick = document.getElementById("pick");
+    const listEl = document.getElementById("plan");
+    const ttkEl = document.getElementById("ttk");
+    const hpEl = document.getElementById("hp");
+    const topTable = document.getElementById("topTable");
+    const render = () => {
+      listEl.innerHTML = plan.map((s, i) => {
+        const it = bySlug[s];
+        return `<li>${it.name} — ${it.dps} DPS, ${it.damage} dmg × ${it.shots} shot(s), ${it.range} cells <button data-i="${i}" style="padding:0 0.4rem;font-size:0.75rem">×</button></li>`;
+      }).join("");
+      listEl.querySelectorAll("button").forEach((b) =>
+        b.addEventListener("click", () => { plan.splice(+b.dataset.i, 1); render(); }));
+      const hp = parseFloat(hpEl.value) || 100;
+      ttkEl.innerHTML = plan.map((s) => {
+        const it = bySlug[s];
+        const volleys = Math.ceil(hp / (it.damage * it.shots));
+        const cycles = (it.warmup + it.cooldown + it.shots * it.interval) / 60;
+        const t = (volleys - 1) * cycles + it.warmup / 60;
+        return `<div>${it.name}: ~${Math.ceil(volleys)} volley(s) · ~${Math.round(t * 10) / 10}s to down ${hp} HP</div>`;
+      }).join("");
+    };
+    document.getElementById("add").addEventListener("click", () => {
+      if (pick.value && !plan.includes(pick.value)) { plan.push(pick.value); render(); }
+    });
+    document.getElementById("clear").addEventListener("click", () => { plan.length = 0; render(); });
+    const filter = () => {
+      const v = q.value.trim().toLowerCase();
+      Array.from(pick.options).forEach((o) => {
+        o.hidden = v && !o.textContent.toLowerCase().includes(v);
+      });
+    };
+    q.addEventListener("input", filter);
+    hpEl.addEventListener("input", render);
+    topTable.innerHTML = items.slice(0, 20).map((x, i) =>
+      `<tr><td>${i + 1}</td><td><a href="/weapons/${x.slug}/">${x.name}</a></td><td style="text-align:right">${x.dps}</td><td style="text-align:right">${x.damage}</td><td style="text-align:right">${x.shots}</td><td style="text-align:right">${x.range}</td></tr>`
+    ).join("");
+    render();
+  </script>
+
+  <Related
+    links={[
+      { href: "/weapons/", title: "Weapons", sub: "Sortable stats table" },
+      { href: "/rankings/", title: "Rankings", sub: "Best picks" },
+      { href: "/apparel/", title: "Apparel", sub: "Armor ratings" },
+    ]}
+  />
+</Base>

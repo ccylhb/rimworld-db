@@ -1,0 +1,169 @@
+---
+import Base from "../layouts/Base.astro";
+import Related from "../components/Related.astro";
+import weapons from "../data/rimworld_weapons.json";
+import apparel from "../data/rimworld_apparel.json";
+import food from "../data/rimworld_food.json";
+import animals from "../data/rimworld_animals.json";
+import plants from "../data/rimworld_plants.json";
+
+const n = (v: any) => {
+  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
+  return m ? parseFloat(m[0]) : 0;
+};
+const dpsOf = (x: any) => {
+  const dmg = n(x.fields?.damage);
+  const range = n(x.fields?.range);
+  const shots = Math.max(parseInt(x.fields?.burst || "1") || 1, 1);
+  const interval = shots > 1 ? (n(x.fields?.burpticks) || 10) : 0;
+  const warmup = n(x.fields?.warmup);
+  const cooldown = n(x.fields?.cooldown);
+  if (dmg <= 0 || range <= 0 || (warmup <= 0 && cooldown <= 0)) return 0;
+  return Math.round(((dmg * shots) / ((warmup + cooldown + shots * interval) / 60)) * 100) / 100;
+};
+const ranged = weapons.map((x) => ({ ...x, dps: dpsOf(x), dmg: n(x.fields?.damage) })).filter((x) => x.dps > 0);
+const topDps = ranged.slice().sort((a, b) => b.dps - a.dps).slice(0, 10);
+const topDmg = ranged.slice().sort((a, b) => b.dmg - a.dmg).slice(0, 10);
+const topArmor = apparel
+  .map((x) => ({ ...x, sharp: n(x.fields?.armorsharp) }))
+  .filter((x) => x.sharp > 0)
+  .sort((a, b) => b.sharp - a.sharp)
+  .slice(0, 10);
+const topCold = apparel
+  .map((x) => ({ ...x, cold: n(x.fields?.insulationcold) }))
+  .filter((x) => x.cold > 0)
+  .sort((a, b) => b.cold - a.cold)
+  .slice(0, 10);
+const topNut = food
+  .map((x) => ({ ...x, nut: n(x.fields?.nutrition) }))
+  .filter((x) => x.nut > 0)
+  .sort((a, b) => b.nut - a.nut)
+  .slice(0, 10);
+const topSpeed = animals
+  .map((x) => ({ ...x, sp: n(x.fields?.movespeed) }))
+  .filter((x) => x.sp > 0)
+  .sort((a, b) => b.sp - a.sp)
+  .slice(0, 10);
+const topCp = animals
+  .map((x) => ({ ...x, cp: n(x.fields?.combatpower) }))
+  .filter((x) => x.cp > 0)
+  .sort((a, b) => b.cp - a.cp)
+  .slice(0, 10);
+const fastGrow = plants
+  .map((x) => ({ ...x, g: n(x.fields?.["grow days"]) }))
+  .filter((x) => x.g > 0)
+  .sort((a, b) => a.g - b.g)
+  .slice(0, 10);
+---
+<Base
+  title="RimWorld Rankings — best weapon DPS, armor, food & animals"
+  description="RimWorld leaderboards: top weapon DPS, highest damage, best sharp armor, warmest cold insulation, most nutritious food, fastest and strongest animals, quickest crops."
+>
+  <h1>Rankings</h1>
+  <p class="muted">Leaderboards computed from full infobox data. Click any entry for details.</p>
+
+  <div class="grid grid-2" style="margin:1.25rem 0">
+    <div class="card">
+      <h2 style="margin-top:0">🔫 Top weapon DPS</h2>
+      <ol class="rank-list">
+        {topDps.map((x) => (
+          <li>
+            <a href={`/weapons/${x.slug}/`}>{x.title}</a>
+            <span class="muted"> — {x.dps} DPS</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">💥 Highest damage per shot</h2>
+      <ol class="rank-list">
+        {topDmg.map((x) => (
+          <li>
+            <a href={`/weapons/${x.slug}/`}>{x.title}</a>
+            <span class="muted"> — {x.dmg} damage</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">🛡️ Best sharp armor</h2>
+      <ol class="rank-list">
+        {topArmor.map((x) => (
+          <li>
+            <a href={`/apparel/${x.slug}/`}>{x.title}</a>
+            {x.icon_file && <img src={`/icons/${x.icon_file}`} alt="" width="20" height="20" style="vertical-align:middle" loading="lazy" />}
+            <span class="muted"> — {x.sharp}% sharp</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">🧊 Best cold insulation</h2>
+      <ol class="rank-list">
+        {topCold.map((x) => (
+          <li>
+            <a href={`/apparel/${x.slug}/`}>{x.title}</a>
+            <span class="muted"> — -{x.cold}°C</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">🍚 Most nutritious food</h2>
+      <ol class="rank-list">
+        {topNut.map((x) => (
+          <li>
+            <a href={`/food/${x.slug}/`}>{x.title}</a>
+            <span class="muted"> — {x.nut} nutrition</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">🐎 Fastest animals</h2>
+      <ol class="rank-list">
+        {topSpeed.map((x) => (
+          <li>
+            <a href={`/animals/${x.slug}/`}>{x.title}</a>
+            <span class="muted"> — {x.sp} c/s</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">🐻 Strongest animals (combat power)</h2>
+      <ol class="rank-list">
+        {topCp.map((x) => (
+          <li>
+            <a href={`/animals/${x.slug}/`}>{x.title}</a>
+            <span class="muted"> — CP {x.cp}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">🌱 Quickest crops</h2>
+      <ol class="rank-list">
+        {fastGrow.map((x) => (
+          <li>
+            <a href={`/plants/${x.slug}/`}>{x.title}</a>
+            <span class="muted"> — {x.g} grow days</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+
+  <Related
+    links={[
+      { href: "/dps-calculator/", title: "DPS Calculator", sub: "Compare weapons", tool: true },
+      { href: "/weapons/", title: "Weapons", sub: "Sortable stats table" },
+      { href: "/apparel/", title: "Apparel", sub: "Sortable armor table" },
+    ]}
+  />
+</Base>
+
+<style>
+  .rank-list { margin: 0; padding-left: 1.3rem; line-height: 1.9; }
+  .rank-list img { margin-left: 0.3rem; }
+</style>

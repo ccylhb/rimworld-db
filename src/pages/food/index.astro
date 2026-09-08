@@ -1,0 +1,49 @@
+---
+import Base from "../../layouts/Base.astro";
+import DataTable from "../../components/DataTable.astro";
+import Related from "../../components/Related.astro";
+import food from "../../data/rimworld_food.json";
+
+const n = (v: any) => {
+  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
+  return m ? parseFloat(m[0]) : "";
+};
+const rows = food
+  .map((x) => ({
+    name: `<a href="/food/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+    _sort: x.title.toLowerCase(),
+    nutrition: n(x.fields?.nutrition),
+    rot: n(x.fields?.["days to rot"]),
+    value: n(x.fields?.marketvalue),
+    mass: n(x.fields?.["mass base"]),
+    foodtype: (x.fields?.["food type"] || "").slice(0, 20),
+  }))
+  .sort((a: any, b: any) => a._sort.localeCompare(b._sort));
+---
+<Base
+  title={`RimWorld Food — ${food.length} foods with nutrition & rot times`}
+  description={`RimWorld food database: nutrition, days to rot, market value and mass for ${food.length} meals and raw food.`}
+>
+  <h1>Food</h1>
+  <p class="muted">{food.length} items · nutrition (0.9 = a full meal), days to rot, value and mass. Click a column to sort.</p>
+  <DataTable
+    id="food"
+    rows={rows as any}
+    searchPlaceholder="Search food..."
+    columns={[
+      { key: "name", label: "Food" },
+      { key: "nutrition", label: "Nutrition", type: "number" },
+      { key: "rot", label: "Days to rot", type: "number" },
+      { key: "foodtype", label: "Type" },
+      { key: "mass", label: "Mass (kg)", type: "number" },
+      { key: "value", label: "Value (¤)", type: "number" },
+    ]}
+  />
+  <Related
+    links={[
+      { href: "/plants/", title: "Plants", sub: "Grow times & yields" },
+      { href: "/animals/", title: "Animals", sub: "Stats & diet" },
+      { href: "/rankings/", title: "Rankings", sub: "Best picks" },
+    ]}
+  />
+</Base>

@@ -1,0 +1,32 @@
+{
+  "siteName": "RimWorldDB",
+  "siteUrl": "https://rimworld-db.pages.dev",
+  "tagline": "RimWorld database — weapon DPS, armor values & animal stats",
+  "description": "RimWorld stats: weapon damage, DPS, range and accuracy, apparel armor ratings, food nutrition, animal stats and plant grow times — with a DPS calculator.",
+  "adsenseClientId": "ca-pub-3245910354455258",
+  "adsensePublisherId": "pub-3245910354455258",
+  "favicon": "🚀",
+  "footerNote": "Unofficial fan-made database for RimWorld. Not affiliated with Ludeon Studios.",
+  "theme": {
+    "bg": "#17110c",
+    "bgSoft": "#1f1812",
+    "card": "#261d15",
+    "border": "#3d3023",
+    "text": "#eee6da",
+    "muted": "#a89880",
+    "accent": "#d98e3f",
+    "accent2": "#eab271",
+    "good": "#7fb069",
+    "bad": "#c75146"
+  },
+  "nav": [
+    { "href": "/weapons/", "label": "Weapons" },
+    { "href": "/apparel/", "label": "Apparel" },
+    { "href": "/food/", "label": "Food" },
+    { "href": "/animals/", "label": "Animals" },
+    { "href": "/plants/", "label": "Plants" },
+    { "href": "/rankings/", "label": "Rankings" },
+    { "href": "/dps-calculator/", "label": "DPS Calculator", "tool": true },
+    { "href": "/search/", "label": "A-Z" }
+  ]
+}

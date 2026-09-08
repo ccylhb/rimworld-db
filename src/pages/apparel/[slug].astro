@@ -1,0 +1,45 @@
+---
+import Base from "../../layouts/Base.astro";
+import Related from "../../components/Related.astro";
+import EntryStats from "../../components/EntryStats.astro";
+import apparel from "../../data/rimworld_apparel.json";
+
+export function getStaticPaths() {
+  return apparel.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
+}
+
+const { x } = Astro.props as any;
+const f = x.fields || {};
+const similar = apparel
+  .filter((o: any) => o.slug !== x.slug && (o.fields?.type2 || "") === (f.type2 || ""))
+  .slice(0, 6);
+---
+<Base
+  title={`${x.title} — RimWorld apparel stats (sharp ${f.armorsharp || "?"}, cold ${f.insulationcold || "?"}°C)`}
+  description={`${x.title}: ${f.armorsharp || "?"}% sharp armor${f.armorblunt ? `, ${f.armorblunt}% blunt` : ""}${f.insulationcold ? `, ${f.insulationcold}°C cold insulation` : ""} — RimWorld apparel values.`}
+>
+  <h1 class="icon-h1">
+    {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
+    <span>{x.title}</span>
+  </h1>
+  {f.description && <p class="muted">{f.description}</p>}
+  <EntryStats entry={x} keys={["armorsharp", "armorblunt", "armorheat", "insulationcold", "insulationheat", "hp", "marketvalue"]} labels={{ armorsharp: "Sharp armor", armorblunt: "Blunt armor", armorheat: "Heat armor", insulationcold: "Cold insulation (°C)", insulationheat: "Heat insulation (°C)", hp: "HP", marketvalue: "Value (¤)" }} />
+  <p>
+    {f.type2 && <span class="tag" style="margin:0.1rem">{f.type2}</span>}
+    {f["tech level"] && <span class="tag" style="margin:0.1rem">{f["tech level"]}</span>}
+  </p>
+  {f["body part covered"] && <p><strong>Covers:</strong> {f["body part covered"]}</p>}
+  {x.intro && <p>{x.intro}</p>}
+  <Related
+    links={[
+      ...similar.map((s: any) => ({
+        href: `/apparel/${s.slug}/`,
+        title: s.title,
+        sub: `Sharp ${s.fields?.armorsharp || "?"} · Blunt ${s.fields?.armorblunt || "?"}`,
+        icon: s.icon_file ? `/icons/${s.icon_file}` : undefined,
+      })),
+      { href: "/apparel/", title: "All Apparel", sub: "Sortable armor table" },
+      { href: "/rankings/", title: "Rankings", sub: "Best armor per kg" },
+    ]}
+  />
+</Base>

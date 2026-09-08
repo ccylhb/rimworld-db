@@ -1,0 +1,80 @@
+---
+import Base from "../layouts/Base.astro";
+import Related from "../components/Related.astro";
+import weapons from "../data/rimworld_weapons.json";
+import apparel from "../data/rimworld_apparel.json";
+import food from "../data/rimworld_food.json";
+import animals from "../data/rimworld_animals.json";
+import plants from "../data/rimworld_plants.json";
+
+const total = weapons.length + apparel.length + food.length + animals.length + plants.length;
+const n = (v: any) => {
+  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
+  return m ? parseFloat(m[0]) : 0;
+};
+const dpsOf = (x: any) => {
+  const dmg = n(x.fields?.damage);
+  const range = n(x.fields?.range);
+  const shots = Math.max(parseInt(x.fields?.burst || "1") || 1, 1);
+  const interval = shots > 1 ? (n(x.fields?.burpticks) || 10) : 0;
+  const warmup = n(x.fields?.warmup);
+  const cooldown = n(x.fields?.cooldown);
+  if (dmg <= 0 || range <= 0 || (warmup <= 0 && cooldown <= 0)) return 0;
+  return Math.round(((dmg * shots) / ((warmup + cooldown + shots * interval) / 60)) * 100) / 100;
+};
+const bestWeapon = weapons.map((x) => ({ ...x, dps: dpsOf(x) })).filter((x) => x.dps > 0).sort((a, b) => b.dps - a.dps)[0];
+const bestArmor = apparel.map((x) => ({ ...x, sharp: n(x.fields?.armorsharp) })).filter((x) => x.sharp > 0).sort((a, b) => b.sharp - a.sharp)[0];
+const fastest = animals.map((x) => ({ ...x, sp: n(x.fields?.movespeed) })).filter((x) => x.sp > 0).sort((a, b) => b.sp - a.sp)[0];
+---
+<Base title="RimWorldDB — RimWorld weapon DPS, armor values & animal stats" description={`RimWorld stats database: ${total} entries — weapon damage/DPS/range, apparel armor ratings, food nutrition, animal stats and plant grow times with a DPS calculator.`}>
+  <div style="text-align:center;margin:2.5rem 0 2rem">
+    <h1 style="font-size:clamp(2.2rem,6vw,3.4rem)">Optimize the colony, by the numbers.</h1>
+    <p class="muted" style="font-size:1.15rem;max-width:640px;margin:0.75rem auto">
+      {total} RimWorld entries with exact values — what to arm, what to wear, what to farm. Every stat, no fluff.
+    </p>
+    <p style="margin-top:1.5rem">
+      <a href="/weapons/" style="display:inline-block;background:var(--accent);color:var(--bg);font-weight:700;padding:0.7rem 1.4rem;border-radius:10px;margin:0.25rem">Weapons & DPS</a>
+      <a href="/dps-calculator/" style="display:inline-block;border:1px solid var(--accent);color:var(--accent);font-weight:700;padding:0.7rem 1.4rem;border-radius:10px;margin:0.25rem">DPS Calculator</a>
+    </p>
+  </div>
+
+  <div class="grid grid-3" style="margin:2rem 0">
+    <a class="card" href="/weapons/" style="color:inherit">
+      <div class="stat-num">{weapons.length}</div>
+      <div class="stat-label">Weapons · DPS</div>
+      <p class="muted" style="font-size:0.9rem">Damage, range, accuracy, warmup/cooldown and computed DPS.</p>
+    </a>
+    <a class="card" href="/apparel/" style="color:inherit">
+      <div class="stat-num">{apparel.length}</div>
+      <div class="stat-label">Apparel · armor</div>
+      <p class="muted" style="font-size:0.9rem">Sharp/blunt/heat armor, insulation and HP per piece.</p>
+    </a>
+    <a class="card" href="/animals/" style="color:inherit">
+      <div class="stat-num">{animals.length}</div>
+      <div class="stat-label">Animals · stats</div>
+      <p class="muted" style="font-size:0.9rem">Speed, armor, combat power, wildness and diet.</p>
+    </a>
+  </div>
+
+  <h2>Jump to the answer</h2>
+  <div class="card answer-card">
+    <ul style="margin:0;padding-left:1.2rem;line-height:2">
+      <li>Highest-DPS weapon: <a href={`/weapons/${bestWeapon?.slug}/`}>{bestWeapon?.title}</a> — {bestWeapon?.dps} DPS</li>
+      <li>Best sharp armor: <a href={`/apparel/${bestArmor?.slug}/`}>{bestArmor?.title}</a> — {bestArmor?.sharp}%</li>
+      <li>Fastest animal: <a href={`/animals/${fastest?.slug}/`}>{fastest?.title}</a> — {fastest?.sp} c/s</li>
+    </ul>
+  </div>
+
+  <Related
+    heading="All boards"
+    links={[
+      { href: "/weapons/", title: "Weapons", sub: `${weapons.length} entries` },
+      { href: "/apparel/", title: "Apparel", sub: `${apparel.length} entries` },
+      { href: "/food/", title: "Food", sub: `${food.length} entries` },
+      { href: "/animals/", title: "Animals", sub: `${animals.length} entries` },
+      { href: "/plants/", title: "Plants", sub: `${plants.length} entries` },
+      { href: "/rankings/", title: "Rankings", sub: "Leaderboards" },
+      { href: "/dps-calculator/", title: "DPS Calculator", sub: "Compare weapons", tool: true },
+    ]}
+  />
+</Base>
