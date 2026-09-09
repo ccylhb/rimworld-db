@@ -1,0 +1,48 @@
+---
+import Base from "../layouts/Base.astro";
+import DataTable from "../components/DataTable.astro";
+import apparel from "../data/rimworld_apparel.json";
+const n = (v: any) => {
+  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
+  return m ? m[0] : "";
+};
+const pct = (v: any) => { const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/); return m ? parseFloat(m[0]) : 0; };
+let data = apparel.slice();
+data = data.sort((a: any, b: any) => pct(b.fields?.armorsharp) - pct(a.fields?.armorsharp));
+const rows = data.map((x: any) => ({
+    name: `<a href="/apparel/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+
+    sharp: pct(x.fields?.armorsharp),
+    blunt: pct(x.fields?.armorblunt),
+    heat: pct(x.fields?.armorheat),
+    insCold: pct(x.fields?.insulationcold),
+    insHeat: pct(x.fields?.insulationheat),
+    layer: (x.fields?.layer || "").slice(0, 16),
+    coverage: (x.fields?.coverage || "").slice(0, 10),
+    tech: (x.fields["tech level"] || "").slice(0, 12),
+  }));
+---
+<Base
+  title={`Best Armor — Sharp, Blunt & Heat Protection`}
+  description={`RimWorld apparel ranked by sharp armour — with blunt, heat, cold insulation and coverage for every layer.`}
+>
+  <h1>Best Armor — Sharp, Blunt & Heat Protection</h1>
+  <p class="muted">RimWorld apparel ranked by sharp armour — with blunt, heat, cold insulation and coverage for every layer.</p>
+  
+  <DataTable
+    id="best-armor"
+    rows={rows as any}
+    searchPlaceholder="Filter..."
+    columns={[
+      { key: "name", label: "Apparel" },
+      { key: "sharp", label: "Armor sharp", type: "number" },
+      { key: "blunt", label: "Armor blunt", type: "number" },
+      { key: "heat", label: "Armor heat", type: "number" },
+      { key: "insCold", label: "Insul cold", type: "number" },
+      { key: "insHeat", label: "Insul heat", type: "number" },
+      { key: "layer", label: "Layer" },
+      { key: "coverage", label: "Coverage" },
+      { key: "tech", label: "Tech" },
+    ]}
+  />
+</Base>

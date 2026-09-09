@@ -3,6 +3,8 @@ import Base from "../../layouts/Base.astro";
 import Related from "../../components/Related.astro";
 import EntryStats from "../../components/EntryStats.astro";
 import plants from "../../data/rimworld_plants.json";
+import mesh from "../../data/mesh.json";
+import { introHtml } from "../../lib/mesh";
 
 export function getStaticPaths() {
   return plants.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
@@ -13,6 +15,7 @@ const f = x.fields || {};
 const similar = plants
   .filter((o: any) => o.slug !== x.slug && (o.fields?.product || "") === (f.product || "") && f.product)
   .slice(0, 6);
+const ihtml = introHtml(x.intro, mesh, x.title);
 ---
 <Base
   title={`${x.title} — RimWorld plant stats (${f["grow days"] || "?"} grow days)`}
@@ -29,7 +32,7 @@ const similar = plants
     {f["food type"] && <span class="tag" style="margin:0.1rem">{f["food type"]}</span>}
     {f["cave plant"] && <span class="tag" style="margin:0.1rem">Cave plant</span>}
   </p>
-  {x.intro && <p>{x.intro}</p>}
+  {ihtml && <p set:html={ihtml}></p>}
   <Related
     links={[
       ...similar.map((s: any) => ({
@@ -40,6 +43,8 @@ const similar = plants
       })),
       { href: "/plants/", title: "All Plants", sub: "Sortable grow table" },
       { href: "/food/", title: "Food", sub: "Nutrition values" },
+    
+      { href: "/rankings/", title: "Rankings", sub: "Best picks" },
     ]}
   />
 </Base>

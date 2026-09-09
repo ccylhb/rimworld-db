@@ -1,0 +1,51 @@
+---
+import Base from "../layouts/Base.astro";
+import DataTable from "../components/DataTable.astro";
+import weapons from "../data/rimworld_weapons.json";
+const n = (v: any) => {
+  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
+  return m ? m[0] : "";
+};
+let data = weapons.filter((x: any) => x.fields?.dps);
+data = data.sort((a: any, b: any) => parseFloat(b.fields.dps) - parseFloat(a.fields.dps));
+const rows = data.map((x: any) => ({
+    name: `<a href="/weapons/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+
+    dps: n(x.fields?.dps),
+    damage: n(x.fields?.damage),
+    armorpen: n(x.fields?.armorpenetration),
+    range: n(x.fields?.range),
+    accTouch: n(x.fields?.accuracytouch),
+    accShort: n(x.fields?.accuracyshort),
+    accMed: n(x.fields?.accuracymedium),
+    accLong: n(x.fields?.accuracylong),
+    mode: (x.fields?.mode || "").slice(0, 10),
+    tech: (x.fields["tech level"] || "").slice(0, 12),
+  }));
+---
+<Base
+  title={`Best Ranged Weapons by DPS`}
+  description={`RimWorld ranged weapons ranked by DPS — damage, armour penetration, range and accuracy at every engagement distance.`}
+>
+  <h1>Best Ranged Weapons by DPS</h1>
+  <p class="muted">RimWorld ranged weapons ranked by DPS — damage, armour penetration, range and accuracy at every engagement distance.</p>
+  
+  <DataTable
+    id="best-ranged-weapons"
+    rows={rows as any}
+    searchPlaceholder="Filter..."
+    columns={[
+      { key: "name", label: "Weapon" },
+      { key: "dps", label: "DPS", type: "number" },
+      { key: "damage", label: "Damage", type: "number" },
+      { key: "armorpen", label: "AP", type: "number" },
+      { key: "range", label: "Range", type: "number" },
+      { key: "accTouch", label: "Acc touch", type: "number" },
+      { key: "accShort", label: "Acc short", type: "number" },
+      { key: "accMed", label: "Acc med", type: "number" },
+      { key: "accLong", label: "Acc long", type: "number" },
+      { key: "mode", label: "Mode" },
+      { key: "tech", label: "Tech" },
+    ]}
+  />
+</Base>

@@ -3,6 +3,8 @@ import Base from "../../layouts/Base.astro";
 import Related from "../../components/Related.astro";
 import EntryStats from "../../components/EntryStats.astro";
 import animals from "../../data/rimworld_animals.json";
+import mesh from "../../data/mesh.json";
+import { introHtml } from "../../lib/mesh";
 
 export function getStaticPaths() {
   return animals.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
@@ -14,6 +16,7 @@ const atk = [1, 2, 3, 4, 5, 6].map((i) => ({ dmg: f[`attack${i}dmg`], type: f[`a
 const similar = animals
   .filter((o: any) => o.slug !== x.slug && (o.fields?.diet || "") === (f.diet || ""))
   .slice(0, 6);
+const ihtml = introHtml(x.intro, mesh, x.title);
 ---
 <Base
   title={`${x.title} — RimWorld animal stats (speed ${f.movespeed || "?"}, combat power ${f.combatpower || "?"})`}
@@ -34,7 +37,7 @@ const similar = animals
   {atk.length > 0 && (
     <p><strong>Attacks:</strong> {atk.map((a) => `${a.part || "body"} ${a.dmg} (${a.type})`).join(" · ")}</p>
   )}
-  {x.intro && <p>{x.intro}</p>}
+  {ihtml && <p set:html={ihtml}></p>}
   <Related
     links={[
       ...similar.map((s: any) => ({
