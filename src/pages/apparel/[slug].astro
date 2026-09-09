@@ -16,6 +16,25 @@ const similar = apparel
   .filter((o: any) => o.slug !== x.slug && (o.fields?.type2 || "") === (f.type2 || ""))
   .slice(0, 6);
 const ihtml = introHtml(x.intro, mesh, x.title);
+const __slug = Astro.params.slug;
+const __ld = [
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://rimworld-db.pages.dev/" },
+      { "@type": "ListItem", position: 2, name: "Apparel", item: "https://rimworld-db.pages.dev/apparel/" },
+      { "@type": "ListItem", position: 3, name: x.title },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: x.title,
+    description: (x.intro || "").slice(0, 160),
+    mainEntityOfPage: "https://rimworld-db.pages.dev" + "/apparel/" + __slug + "/",
+  },
+];
 ---
 <Base
   title={`${x.title} — RimWorld apparel stats (sharp ${f.armorsharp || "?"}, cold ${f.insulationcold || "?"}°C)`}
@@ -45,4 +64,5 @@ const ihtml = introHtml(x.intro, mesh, x.title);
       { href: "/rankings/", title: "Rankings", sub: "Best armor per kg" },
     ]}
   />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(__ld)}></script>
 </Base>

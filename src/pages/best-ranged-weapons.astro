@@ -22,6 +22,16 @@ const rows = data.map((x: any) => ({
     mode: (x.fields?.mode || "").slice(0, 10),
     tech: (x.fields["tech level"] || "").slice(0, 12),
   }));
+const __ld = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: `Best Ranged Weapons by DPS`,
+    description: `RimWorld ranged weapons ranked by DPS — damage, armour penetration, range and accuracy at every engagement distance.`,
+    mainEntityOfPage: "https://rimworld-db.pages.dev/best-ranged-weapons/",
+  },
+];
+
 ---
 <Base
   title={`Best Ranged Weapons by DPS`}
@@ -48,4 +58,5 @@ const rows = data.map((x: any) => ({
       { key: "tech", label: "Tech" },
     ]}
   />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(__ld)}></script>
 </Base>

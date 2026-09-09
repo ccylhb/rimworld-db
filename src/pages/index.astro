@@ -27,6 +27,18 @@ const dpsOf = (x: any) => {
 const bestWeapon = weapons.map((x) => ({ ...x, dps: dpsOf(x) })).filter((x) => x.dps > 0).sort((a, b) => b.dps - a.dps)[0];
 const bestArmor = apparel.map((x) => ({ ...x, sharp: n(x.fields?.armorsharp) })).filter((x) => x.sharp > 0).sort((a, b) => b.sharp - a.sharp)[0];
 const fastest = animals.map((x) => ({ ...x, sp: n(x.fields?.movespeed) })).filter((x) => x.sp > 0).sort((a, b) => b.sp - a.sp)[0];
+const __ld = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "RimWorldDB",
+  url: "https://rimworld-db.pages.dev/",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: { "@type": "EntryPoint", urlTemplate: "https://rimworld-db.pages.dev/search/?q={search_term_string}" },
+    "query-input": "required name=search_term_string",
+  },
+};
+
 ---
 <Base title="RimWorldDB — RimWorld weapon DPS, armor values & animal stats" description={`RimWorld stats database: ${total} entries — weapon damage/DPS/range, apparel armor ratings, food nutrition, animal stats and plant grow times with a DPS calculator.`}>
   <div style="text-align:center;margin:2.5rem 0 2rem">
@@ -87,4 +99,5 @@ const fastest = animals.map((x) => ({ ...x, sp: n(x.fields?.movespeed) })).filte
       { href: "/dps-calculator/", title: "DPS Calculator", sub: "Compare weapons", tool: true },
     ]}
   />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(__ld)}></script>
 </Base>
