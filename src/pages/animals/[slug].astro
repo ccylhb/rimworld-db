@@ -1,4 +1,5 @@
 ---
+const SITE = Astro.site?.origin ?? "";
 import Base from "../../layouts/Base.astro";
 import Related from "../../components/Related.astro";
 import EntryStats from "../../components/EntryStats.astro";
@@ -23,8 +24,8 @@ const __ld = [
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://rimworld-db.pages.dev/" },
-      { "@type": "ListItem", position: 2, name: "Animals", item: "https://rimworld-db.pages.dev/animals/" },
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE + "/" },
+      { "@type": "ListItem", position: 2, name: "Animals", item: SITE + "/animals/" },
       { "@type": "ListItem", position: 3, name: x.title },
     ],
   },
@@ -33,7 +34,7 @@ const __ld = [
     "@type": "Article",
     headline: x.title,
     description: (x.intro || "").slice(0, 160),
-    mainEntityOfPage: "https://rimworld-db.pages.dev" + "/animals/" + __slug + "/",
+    mainEntityOfPage: SITE + "/animals/" + __slug + "/",
   },
 ];
 ---

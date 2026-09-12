@@ -1,4 +1,5 @@
 ---
+const SITE = Astro.site?.origin ?? "";
 import Base from "../layouts/Base.astro";
 import DataTable from "../components/DataTable.astro";
 import weapons from "../data/rimworld_weapons.json";
@@ -28,7 +29,7 @@ const __ld = [
     "@type": "Article",
     headline: `Best Ranged Weapons by DPS`,
     description: `RimWorld ranged weapons ranked by DPS — damage, armour penetration, range and accuracy at every engagement distance.`,
-    mainEntityOfPage: "https://rimworld-db.pages.dev/best-ranged-weapons/",
+    mainEntityOfPage: SITE + "/best-ranged-weapons/",
   },
 ];
 
