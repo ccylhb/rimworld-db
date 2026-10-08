@@ -52,6 +52,16 @@
     {
       "href": "/search/",
       "label": "A-Z"
+    },
+    {
+      "href": "/best-armor/",
+      "label": "Best Armor",
+      "tool": true
+    },
+    {
+      "href": "/best-ranged-weapons/",
+      "label": "Best Ranged",
+      "tool": true
     }
   ],
   "sisterSites": [
