@@ -20,13 +20,64 @@
     "bad": "#c75146"
   },
   "nav": [
-    { "href": "/weapons/", "label": "Weapons" },
-    { "href": "/apparel/", "label": "Apparel" },
-    { "href": "/food/", "label": "Food" },
-    { "href": "/animals/", "label": "Animals" },
-    { "href": "/plants/", "label": "Plants" },
-    { "href": "/rankings/", "label": "Rankings" },
-    { "href": "/dps-calculator/", "label": "DPS Calculator", "tool": true },
-    { "href": "/search/", "label": "A-Z" }
-  ]
+    {
+      "href": "/weapons/",
+      "label": "Weapons"
+    },
+    {
+      "href": "/apparel/",
+      "label": "Apparel"
+    },
+    {
+      "href": "/food/",
+      "label": "Food"
+    },
+    {
+      "href": "/animals/",
+      "label": "Animals"
+    },
+    {
+      "href": "/plants/",
+      "label": "Plants"
+    },
+    {
+      "href": "/rankings/",
+      "label": "Rankings"
+    },
+    {
+      "href": "/dps-calculator/",
+      "label": "DPS Calculator",
+      "tool": true
+    },
+    {
+      "href": "/search/",
+      "label": "A-Z"
+    }
+  ],
+  "sisterSites": [
+    {
+      "name": "LongDarkDB",
+      "url": "https://thelongdark.lootseer.com",
+      "blurb": "Calories, hydration, vitamin C, clothing warmth and afflictions."
+    },
+    {
+      "name": "Dinkly",
+      "url": "https://dinkly.lootseer.com",
+      "blurb": "Three-minute micro-breaks: daily draws, quizzes, jokes and sounds."
+    },
+    {
+      "name": "DiverDB",
+      "url": "https://diverdb.lootseer.com",
+      "blurb": "Fish farming stats, recipe filters and staff comparisons."
+    },
+    {
+      "name": "PalHub",
+      "url": "https://palhub.lootseer.com",
+      "blurb": "Breeding calculator, work suitability tables and base-building guides."
+    }
+  ],
+  "hubSite": {
+    "name": "LootSeer",
+    "url": "https://lootseer.com"
+  }
 }
