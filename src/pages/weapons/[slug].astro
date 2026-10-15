@@ -6,17 +6,16 @@ import EntryStats from "../../components/EntryStats.astro";
 import weapons from "../../data/rimworld_weapons.json";
 import mesh from "../../data/mesh.json";
 import { introHtml } from "../../lib/mesh";
+import { weaponDesc, weaponTitle } from "../../lib/seo";
 
 export function getStaticPaths() {
   return weapons.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
 }
 
 const { x } = Astro.props as any;
+const title = weaponTitle(x);
+const description = weaponDesc(x);
 const f = x.fields || {};
-const n = (v: any) => {
-  const m = String(v ?? "").match(/-?\d+(?:\.\d+)?/);
-  return m ? m[0] : "";
-};
 const similar = weapons
   .filter((o: any) => o.slug !== x.slug && (o.fields?.["tech level"] || "") === (f["tech level"] || ""))
   .slice(0, 6);
@@ -36,15 +35,12 @@ const __ld = [
     "@context": "https://schema.org",
     "@type": "Article",
     headline: x.title,
-    description: (x.intro || "").slice(0, 160),
+    description,
     mainEntityOfPage: SITE + "/weapons/" + __slug + "/",
   },
 ];
 ---
-<Base
-  title={`${x.title} — RimWorld weapon stats (damage ${n(f.damage) || "?"}, range ${n(f.range) || "?"})`}
-  description={`${x.title}: ${n(f.damage) || "?"} ${f["damage type"] || ""} damage, ${n(f.range) || "?"} cell range, warmup ${n(f.warmup) || "?"} ticks, cooldown ${n(f.cooldown) || "?"} ticks — RimWorld weapon values.`}
->
+<Base title={title} description={description}>
   <h1 class="icon-h1">
     {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
     <span>{x.title}</span>

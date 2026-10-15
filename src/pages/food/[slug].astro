@@ -6,12 +6,15 @@ import EntryStats from "../../components/EntryStats.astro";
 import food from "../../data/rimworld_food.json";
 import mesh from "../../data/mesh.json";
 import { introHtml } from "../../lib/mesh";
+import { foodDesc, foodTitle } from "../../lib/seo";
 
 export function getStaticPaths() {
   return food.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
 }
 
 const { x } = Astro.props as any;
+const title = foodTitle(x);
+const description = foodDesc(x);
 const f = x.fields || {};
 const similar = food
   .filter((o: any) => o.slug !== x.slug && (o.fields?.["food type"] || "") === (f["food type"] || ""))
@@ -32,15 +35,12 @@ const __ld = [
     "@context": "https://schema.org",
     "@type": "Article",
     headline: x.title,
-    description: (x.intro || "").slice(0, 160),
+    description,
     mainEntityOfPage: SITE + "/food/" + __slug + "/",
   },
 ];
 ---
-<Base
-  title={`${x.title} — RimWorld food stats (nutrition ${f.nutrition || "?"})`}
-  description={`${x.title}: ${f.nutrition || "?"} nutrition${f["days to rot"] ? `, ${f["days to rot"]} days to rot` : ""} — RimWorld food values.`}
->
+<Base title={title} description={description}>
   <h1 class="icon-h1">
     {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
     <span>{x.title}</span>

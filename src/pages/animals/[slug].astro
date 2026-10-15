@@ -6,12 +6,15 @@ import EntryStats from "../../components/EntryStats.astro";
 import animals from "../../data/rimworld_animals.json";
 import mesh from "../../data/mesh.json";
 import { introHtml } from "../../lib/mesh";
+import { animalDesc, animalTitle } from "../../lib/seo";
 
 export function getStaticPaths() {
   return animals.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
 }
 
 const { x } = Astro.props as any;
+const title = animalTitle(x);
+const description = animalDesc(x);
 const f = x.fields || {};
 const atk = [1, 2, 3, 4, 5, 6].map((i) => ({ dmg: f[`attack${i}dmg`], type: f[`attack${i}type`], part: f[`attack${i}part`], cool: f[`attack${i}cool`] })).filter((a) => a.dmg);
 const similar = animals
@@ -33,15 +36,12 @@ const __ld = [
     "@context": "https://schema.org",
     "@type": "Article",
     headline: x.title,
-    description: (x.intro || "").slice(0, 160),
+    description,
     mainEntityOfPage: SITE + "/animals/" + __slug + "/",
   },
 ];
 ---
-<Base
-  title={`${x.title} — RimWorld animal stats (speed ${f.movespeed || "?"}, combat power ${f.combatpower || "?"})`}
-  description={`${x.title}: ${f.movespeed || "?"} cells/s speed, ${f.combatpower || "?"} combat power${f.armorsharp ? `, ${f.armorsharp}% sharp armor` : ""} — RimWorld animal stats.`}
->
+<Base title={title} description={description}>
   <h1 class="icon-h1">
     {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
     <span>{x.title}</span>

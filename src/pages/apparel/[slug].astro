@@ -6,12 +6,15 @@ import EntryStats from "../../components/EntryStats.astro";
 import apparel from "../../data/rimworld_apparel.json";
 import mesh from "../../data/mesh.json";
 import { introHtml } from "../../lib/mesh";
+import { apparelDesc, apparelTitle } from "../../lib/seo";
 
 export function getStaticPaths() {
   return apparel.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
 }
 
 const { x } = Astro.props as any;
+const title = apparelTitle(x);
+const description = apparelDesc(x);
 const f = x.fields || {};
 const similar = apparel
   .filter((o: any) => o.slug !== x.slug && (o.fields?.type2 || "") === (f.type2 || ""))
@@ -32,15 +35,12 @@ const __ld = [
     "@context": "https://schema.org",
     "@type": "Article",
     headline: x.title,
-    description: (x.intro || "").slice(0, 160),
+    description,
     mainEntityOfPage: SITE + "/apparel/" + __slug + "/",
   },
 ];
 ---
-<Base
-  title={`${x.title} — RimWorld apparel stats (sharp ${f.armorsharp || "?"}, cold ${f.insulationcold || "?"}°C)`}
-  description={`${x.title}: ${f.armorsharp || "?"}% sharp armor${f.armorblunt ? `, ${f.armorblunt}% blunt` : ""}${f.insulationcold ? `, ${f.insulationcold}°C cold insulation` : ""} — RimWorld apparel values.`}
->
+<Base title={title} description={description}>
   <h1 class="icon-h1">
     {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
     <span>{x.title}</span>
